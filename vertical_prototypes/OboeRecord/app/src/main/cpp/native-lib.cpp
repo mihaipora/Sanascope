@@ -16,35 +16,79 @@ void checkResult(oboe::Result result, const char* errorMessage) {
 }
 
 /**
- * Imports oboe and creates, starts, stops and closes an input audio stream
+ * Logs a message in the info-stream
+ * @param msg The message to log
+ */
+void infoLog(const char* msg) {
+    __android_log_print(ANDROID_LOG_INFO, "AudioEngine", "%s", msg);
+}
+
+/**
+ * Creates and starts an audio stream, records some frames, then stops and closes the stream
  */
 extern "C" JNIEXPORT void JNICALL
 Java_com_sanascope_oboerecord_MainActivity_recordAudio(
         JNIEnv *env,
         jobject /* this */) {
 
+    // reacts the incoming frames
+    class MyCallback : public oboe::AudioStreamCallback {
+    public:
+        oboe::DataCallbackResult
+        onAudioReady(oboe::AudioStream *audioStream, void *audioData, int32_t numFrames){
+            infoLog("recording...");
+            return oboe::DataCallbackResult::Stop;
+        }
+    };
+
+    MyCallback myCallback;
+
     // Initialize the stream builder
     oboe::AudioStreamBuilder builder;
     builder.setDirection(oboe::Direction::Input)
             ->setPerformanceMode(oboe::PerformanceMode::LowLatency)
-            ->setSharingMode(oboe::SharingMode::Exclusive);
+            ->setSharingMode(oboe::SharingMode::Exclusive)
+            ->setFormat(oboe::AudioFormat::I16)
+            //->setBufferCapacityInFrames(100)
+            ->setCallback(&myCallback);
     // Keep the defaults for everything else
 
     // Open stream and ensure it was successfully opened
+    infoLog("opening stream...");
     oboe::AudioStream *stream;
     oboe::Result result = builder.openStream(&stream);
     checkResult(result, "Error opening stream %s");
-    // result is: ErrorInternal
-    // Possibilities:
-    // 1. The stream is not correctly initialized
-    // 2. Something went wrong with the permission
 
-    /*
-    result = stream->requestStart();
-    checkResult(result, "Error starting stream %s");
+    // Start stream if it was successfully created
+    if (stream) {
+        infoLog("starting stream...");
+        result = stream->requestStart();
+        checkResult(result, "Error starting stream %s");
+    }
+
+
+    // Record one second of audio data
+    int sr = stream->getSampleRate();
+    int cc = stream->getChannelCount();
+
+    infoLog("starting record...");
+    int16_t *audioData = new int16_t[cc*sr]();
+    int numFrames = sr;
+    // App crashes here
+    // Possible causes
+    //   1. can't write in audioData
+    //   2. Buffer overflows
+    result = stream->read(audioData, numFrames, 0);
+    checkResult(result, "Error reading stream %s");
+
+    // Stop the stream
+    infoLog("stopping stream...");
     result = stream->requestStop();
     checkResult(result, "Error stopping stream %s");
+
+    // Close the stream
+    infoLog("closing stream...");
     result = stream->close();
     checkResult(result, "Error closing stream %s");
-     */
+    infoLog("stream closed...");
 }

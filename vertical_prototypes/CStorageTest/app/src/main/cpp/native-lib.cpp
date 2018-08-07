@@ -2,10 +2,17 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#include <android/native_activity.h>
+#include <android/log.h>
 
-extern "C" JNIEXPORT jstring
-JNICALL
+/**
+ * Logs a message in the info-stream
+ * @param msg The message to log
+ */
+void infoLog(const char* msg) {
+    __android_log_print(ANDROID_LOG_INFO, "MainActivityLogCPP", "%s", msg);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
 Java_com_sanascope_cstoragetest_MainActivity_writeFile(
         JNIEnv *env,
         jobject /* this */,
@@ -22,8 +29,15 @@ Java_com_sanascope_cstoragetest_MainActivity_writeFile(
     env->ReleaseStringUTFChars(jcontent, content);
     const std::string cont_str = std::string(content);
 
-    //writing
-    std::ofstream outfile (path_str + "/test.txt");
+    // create and open file stream
+    std::ofstream outfile(path_str + "/test.txt"); // opens by default an output stream
+    if (outfile.is_open()) {
+        infoLog("filestream open");
+    } else {
+        infoLog("filestream not open");
+    }
+
+    // write the file and close the stream
     outfile << content << std::endl;
     outfile.close();
 

@@ -37,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
      * Requests explicit permission for audio record and triggers onRequestPermissionsResult()
      */
     private void requestRecordPermission(){
+
+
         ActivityCompat.requestPermissions(
                 this,
                 new String[]{Manifest.permission.RECORD_AUDIO},

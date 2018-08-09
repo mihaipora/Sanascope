@@ -23,6 +23,11 @@ void infoLog(const char* msg) {
     __android_log_print(ANDROID_LOG_INFO, "AudioEngine", "%s", msg);
 }
 
+void* initializeBuffer(){
+    int16_t *audioData = new int16_t[1000]();
+    return audioData;
+}
+
 /**
  * Creates and starts an audio stream, records some frames, then stops and closes the stream
  */
@@ -31,17 +36,28 @@ Java_com_sanascope_oboerecord_MainActivity_recordAudio(
         JNIEnv *env,
         jobject /* this */) {
 
-    // reacts the incoming frames
-    class MyCallback : public oboe::AudioStreamCallback {
+    // reacts to the incoming frames
+    class InputCallback : public oboe::AudioStreamCallback {
     public:
         oboe::DataCallbackResult
         onAudioReady(oboe::AudioStream *audioStream, void *audioData, int32_t numFrames){
             infoLog("recording...");
+            audioData = initializeBuffer();
+            return oboe::DataCallbackResult::Continue;
+        }
+    };
+
+    // reacts to the outgoing frames
+    class OutputCallback : public oboe::AudioStreamCallback {
+    public:
+        oboe::DataCallbackResult
+        onAudioReady(oboe::AudioStream *audioStream, void *audioData, int32_t numFrames){
+            infoLog("playing...");
             return oboe::DataCallbackResult::Stop;
         }
     };
 
-    MyCallback myCallback;
+    InputCallback inputCallback;
 
     // Initialize the stream builder
     oboe::AudioStreamBuilder builder;
@@ -50,7 +66,7 @@ Java_com_sanascope_oboerecord_MainActivity_recordAudio(
             ->setSharingMode(oboe::SharingMode::Exclusive)
             ->setFormat(oboe::AudioFormat::I16)
             //->setBufferCapacityInFrames(100)
-            ->setCallback(&myCallback);
+            ->setCallback(&inputCallback);
     // Keep the defaults for everything else
 
     // Open stream and ensure it was successfully opened
@@ -72,7 +88,7 @@ Java_com_sanascope_oboerecord_MainActivity_recordAudio(
     int cc = stream->getChannelCount();
 
     infoLog("starting record...");
-    int16_t *audioData = new int16_t[cc*sr]();
+    void* audioData = initializeBuffer();
     int numFrames = sr;
     // App crashes here
     // Possible causes
@@ -91,4 +107,9 @@ Java_com_sanascope_oboerecord_MainActivity_recordAudio(
     result = stream->close();
     checkResult(result, "Error closing stream %s");
     infoLog("stream closed...");
+
+    while (true) {
+        infoLog("terminated");
+        sleep(2);
+    }
 }

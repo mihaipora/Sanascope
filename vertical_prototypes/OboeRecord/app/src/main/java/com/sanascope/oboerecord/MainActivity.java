@@ -74,7 +74,8 @@ public class MainActivity extends AppCompatActivity {
                     .show();
         } else {
             // Permission was granted, start recording
-            recordAudio();
+            //recordAudio();
+            throughput();
         }
     }
 
@@ -82,5 +83,6 @@ public class MainActivity extends AppCompatActivity {
      * Imports oboe and creates and starts an input audio stream,
      * records some frames, then stops and closes the stream.
      */
-    public native void recordAudio();
+    //public native void recordAudio();
+    public native void throughput();
 }

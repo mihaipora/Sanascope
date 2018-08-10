@@ -24,10 +24,12 @@ private:
 
     const float kSystemWarmupTime = 0.5f;
 
-    //void startStream(oboe::AudioStream *stream);
+    // causes segmentation fault
     void stopStream(oboe::AudioStream *stream) {
         if (stream) {
-            oboe::Result result = stream->start(0L);
+            infoLog("stopping stream...");
+            oboe::Result result = stream->stop(0L);
+            infoLog("stream stopped");
             if (result != oboe::Result::OK) {
                 errorLog(strcat("Error stopping stream. %s", oboe::convertToText(result)));
             }
@@ -44,10 +46,12 @@ private:
     };
 
     void closeAndStopAll(){
-        stopStream(mPlayStream);
-        stopStream(mRecordingStream);
+        infoLog("closing all streams...");
+        //stopStream(mPlayStream);
+        //stopStream(mRecordingStream);
         closeStream(mPlayStream);
         closeStream(mRecordingStream);
+        infoLog("all streams closed");
     };
 
     oboe::AudioStreamBuilder* setupCommonStreamParameters(
@@ -149,7 +153,7 @@ public:
     };
     oboe::DataCallbackResult onAudioReady(oboe::AudioStream *oboeStream,
                                           void *audioData, int32_t numFrames){
-        infoLog("audio callback");
+        //infoLog("audio callback");
         assert(oboeStream == mPlayStream);
         int32_t prevFrameRead = 0, framesRead = 0;
         if (mProcessedFrameCount < mSystemStartupFrames) {
@@ -199,13 +203,25 @@ public:
     }
 };
 
+AudioThroughput* at = nullptr;
+bool throughputActive = false;
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_sanascope_oboerecord_MainActivity_initialize(
+        JNIEnv *env,
+        jobject /* this */) {
+    infoLog("initializing");
+    at = new AudioThroughput();
+}
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_sanascope_oboerecord_MainActivity_throughput(
         JNIEnv *env,
         jobject /* this */) {
-    infoLog("import successfull");
-    AudioThroughput* at = new AudioThroughput();
+    infoLog("throughput toggled");
+    if (!at){
+        errorLog("recreating the AudioThroughput object");
+        at = new AudioThroughput();
+    }
     at->toggleThroughput();
-    //delete(at);
 }

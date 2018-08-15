@@ -33,6 +33,15 @@ public class MainActivity extends AppCompatActivity {
                 requestRecordPermission();
             }
         });
+        Button replayButton = (Button) findViewById(R.id.replay_button);
+        replayButton.setOnClickListener(new View.OnClickListener()
+        {
+            public void onClick(View v)
+            {
+                // Some Android versions require explicit requests for dangerous permissons
+                replay();
+            }
+        });
         initialize();
     }
 
@@ -84,4 +93,5 @@ public class MainActivity extends AppCompatActivity {
      */
     public native void throughput();
     public native void initialize();
+    public native void replay();
 }

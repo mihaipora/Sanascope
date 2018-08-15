@@ -2,6 +2,7 @@
 #include <string>
 #include <oboe/Oboe.h>
 #include <android/log.h>
+#include <sstream>
 
 void infoLog(const char* msg) {
     __android_log_print(ANDROID_LOG_INFO, "AudioEngine", "%s", msg);
@@ -22,6 +23,11 @@ private:
     oboe::AudioStream *mRecordingStream = nullptr;
     oboe::AudioStream *mPlayStream = nullptr;
 
+    const size_t bytesPerFrame = 2;
+    const size_t recsize = 480000;
+    char recording[480000];
+
+private:
     const float kSystemWarmupTime = 0.5f;
 
     // causes segmentation fault
@@ -31,7 +37,7 @@ private:
             oboe::Result result = stream->stop(0L);
             infoLog("stream stopped");
             if (result != oboe::Result::OK) {
-                errorLog(strcat("Error stopping stream. %s", oboe::convertToText(result)));
+                errorLog("Error stopping stream");
             }
         }
     };
@@ -40,7 +46,7 @@ private:
         if (stream) {
             oboe::Result result = stream->close();
             if (result != oboe::Result::OK) {
-                errorLog(strcat("Error closing stream. %s", oboe::convertToText(result)));
+                errorLog("Error closing stream. %s");
             }
         }
     };
@@ -88,8 +94,7 @@ private:
             assert(mRecordingStream->getChannelCount() == mInputChannelCount);
             assert(mRecordingStream->getFormat() == oboe::AudioFormat::I16);
         } else {
-            errorLog(strcat("Failed to create recording stream. Error: %s",
-                 oboe::convertToText(result)));
+            errorLog("Failed to create recording stream");
         }
     }
 
@@ -104,8 +109,7 @@ private:
             mSystemStartupFrames = static_cast<uint64_t>(mSampleRate * kSystemWarmupTime);
             mProcessedFrameCount = 0;
         } else {
-            errorLog(strcat("Failed to create playback stream. Error: %s",
-                 oboe::convertToText(result)));
+            errorLog("Failed to create playback stream.");
         }
     }
 
@@ -114,7 +118,7 @@ private:
         if (stream) {
             oboe::Result result = stream->requestStart();
             if (result != oboe::Result::OK) {
-                errorLog(strcat("Error starting stream. %s", oboe::convertToText(result)));
+                errorLog("Error starting stream.");
             }
         }
     }
@@ -135,12 +139,25 @@ private:
 public:
     AudioThroughput() {
         assert(mOutputChannelCount == mInputChannelCount);
+        memset(recording, 0, recsize);
         infoLog("object created");
     };
     ~AudioThroughput(){
         closeAndStopAll();
         infoLog("object deleted");
     };
+
+    void loadRecordedSamples(void* buffer, size_t frameOffset, size_t numFrames) {
+        memcpy(buffer, &recording[frameOffset*bytesPerFrame], numFrames*bytesPerFrame);
+    }
+
+    int32_t getSamplRate() const {
+        return mSampleRate;
+    }
+
+    int64_t getProcessedFrameCount(){
+        return mProcessedFrameCount;
+    }
 
     /*
      * oboe::AudioStreamCallback interface implementation
@@ -170,8 +187,7 @@ public:
             oboe::ResultWithValue<int32_t> status =
                     mRecordingStream->read(audioData, numFrames, 0);
             if (!status) {
-                errorLog(strcat("input stream read error: %s",
-                     oboe::convertToText(status.error())));
+                errorLog("input stream read error");
                 return oboe::DataCallbackResult ::Stop;
             }
             framesRead = status.value();
@@ -186,10 +202,19 @@ public:
         }
 
         // add your audio processing here
+        memcpy(&recording[mProcessedFrameCount], audioData, numFrames*bytesPerFrame);
 
         mProcessedFrameCount += numFrames;
 
-        return oboe::DataCallbackResult::Continue;
+        std::ostringstream oss;
+        oss << mProcessedFrameCount;
+        infoLog((new std::string(oss.str()))->c_str());
+
+        if (mProcessedFrameCount<recsize) {
+            return oboe::DataCallbackResult::Continue;
+        } else {
+            return oboe::DataCallbackResult::Stop;
+        }
     };
 
     void toggleThroughput(){
@@ -203,8 +228,8 @@ public:
     }
 };
 
+
 AudioThroughput* at = nullptr;
-bool throughputActive = false;
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_sanascope_oboerecord_MainActivity_initialize(
@@ -225,3 +250,72 @@ Java_com_sanascope_oboerecord_MainActivity_throughput(
     }
     at->toggleThroughput();
 }
+
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_sanascope_oboerecord_MainActivity_replay(
+        JNIEnv *env,
+        jobject /* this */) {
+
+    infoLog("replay started");
+    if (!at){
+        errorLog("no AudioThroughput object found");
+        return;
+    }
+    class ReplayCallback : public oboe::AudioStreamCallback {
+    private:
+        unsigned int framesReplayed = 0;
+    public:
+        void onErrorBeforeClose(oboe::AudioStream *oboeStream, oboe::Result error){
+            errorLog("error before closing stream");
+        };
+        void onErrorAfterClose(oboe::AudioStream *oboeStream, oboe::Result error){
+            errorLog("error after closing stream");
+        };
+        oboe::DataCallbackResult
+        onAudioReady(oboe::AudioStream *audioStream, void *audioData, int32_t numFrames){
+            infoLog("replaying...");
+            if (framesReplayed < at->getProcessedFrameCount()) {
+                infoLog("Loading additional frames to replay...");
+                at->loadRecordedSamples(audioStream, framesReplayed, numFrames);
+                std::ostringstream oss;
+                oss << "Replayed " << framesReplayed << " frames out of " << at->getProcessedFrameCount();
+                infoLog((new std::string(oss.str()))->c_str());
+                framesReplayed += numFrames;
+                infoLog("Continuing replay...");
+                return oboe::DataCallbackResult::Continue;
+            } else {
+                infoLog("replay ended");
+                return oboe::DataCallbackResult::Stop;
+            }
+        }
+    };
+
+    infoLog("Creating callback...");
+    ReplayCallback* rc = new ReplayCallback();
+    int32_t sr = at->getSamplRate();
+    infoLog("Callback created. Configuring builder...");
+    oboe::AudioStreamBuilder* builder;
+    builder ->setSampleRate(sr)
+            ->setFormat(oboe::AudioFormat::I16)
+            ->setCallback(rc)
+            ->setDirection(oboe::Direction::Output)
+            ->setChannelCount(oboe::ChannelCount::Stereo);
+    infoLog("Replay builder configured");
+
+    oboe::AudioStream* as = nullptr;
+    infoLog("opening stream...");
+    oboe::Result result = builder->openStream(&as);
+    infoLog("stream opened");
+    if (result == oboe::Result::OK && as) {
+        assert(as->getFormat() == oboe::AudioFormat::I16);
+    } else {
+        errorLog("Failed to create replay stream.");
+    }
+    infoLog("Stream opened. Starting stream...");
+    result = as->requestStart();
+    if (result != oboe::Result::OK) {
+        errorLog("Error starting stream.");
+    }
+}
+

@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v)
             {
                 // Some Android versions require explicit requests for dangerous permissons
-                replay();
+                //replay();
             }
         });
         initialize();
@@ -93,5 +93,4 @@ public class MainActivity extends AppCompatActivity {
      */
     public native void throughput();
     public native void initialize();
-    public native void replay();
 }

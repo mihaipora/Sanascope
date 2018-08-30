@@ -17,8 +17,11 @@ add_library( # Sets the name of the library.
              SHARED
 
              # Provides a relative path to your source file(s).
-             #src/main/cpp/native-lib.cpp
-             src/main/cpp/audio-throughput.cpp
+             src/main/cpp/AudioController.cpp
+             src/main/cpp/AudioRecorder.cpp
+             src/main/cpp/AudioRecord.cpp
+             src/main/cpp/AudioPlayer.cpp
+             src/main/cpp/Utils.cpp
              )
 
 # Searches for a specified prebuilt library and stores the path as a

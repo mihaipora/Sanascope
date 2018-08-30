@@ -3,11 +3,12 @@ package com.sanascope.oboerecord;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
@@ -24,7 +25,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Button toggleButton = (Button) findViewById(R.id.toggle_button);
+
+        // Button
+        FloatingActionButton toggleButton = (FloatingActionButton) findViewById(R.id.RecordButton);
         toggleButton.setOnClickListener(new View.OnClickListener()
         {
             public void onClick(View v)
@@ -33,15 +36,22 @@ public class MainActivity extends AppCompatActivity {
                 requestRecordPermission();
             }
         });
-        Button replayButton = (Button) findViewById(R.id.replay_button);
-        replayButton.setOnClickListener(new View.OnClickListener()
-        {
-            public void onClick(View v)
-            {
-                // Some Android versions require explicit requests for dangerous permissons
-                //replay();
+
+        // Seek bar
+        SeekBar seekBar = (SeekBar) findViewById(R.id.amplificationBar);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                if (b) {setAmplification(i);}
             }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
         });
+
         initialize();
     }
 
@@ -93,4 +103,5 @@ public class MainActivity extends AppCompatActivity {
      */
     public native void throughput();
     public native void initialize();
+    public native void setAmplification(int factor);
 }

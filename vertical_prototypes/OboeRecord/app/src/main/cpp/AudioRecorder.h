@@ -12,6 +12,7 @@ private:
     const char* LOG_TAG = "SAudioRecorder";
 
     uint64_t processedFrameCount = 0;
+    int amplificationFactor;
 
     AudioRecord* rec;
     oboe::AudioStream* recStream;
@@ -29,6 +30,7 @@ public:
     AudioRecorder(AudioRecord* arec);
     void startRecording();
     void stopRecording();
+    void setAmplificationFactor(int factor);
 
 private:
     void startStream(oboe::AudioStream *stream);

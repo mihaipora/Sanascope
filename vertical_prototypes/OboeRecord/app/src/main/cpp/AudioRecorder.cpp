@@ -72,6 +72,10 @@ void AudioRecorder::stopStream(oboe::AudioStream *stream){
     }
 }
 
+void AudioRecorder::setAmplificationFactor(int factor) {
+    amplificationFactor = factor;
+}
+
 oboe::DataCallbackResult AudioRecorder::onAudioReady(oboe::AudioStream *audioStream,
                                                      void *audioData, int32_t numFrames){
     int32_t prevFrameRead = 0, framesRead = 0;
@@ -108,7 +112,7 @@ oboe::DataCallbackResult AudioRecorder::onAudioReady(oboe::AudioStream *audioStr
     debug::infoLog(LOG_TAG, "Casting audioData...");
     int16_t* data = static_cast<int16_t*>(audioData);
     for (int i = 0; i < numFrames; i++) {
-        data[i] = 15 * data[i];
+        data[i] = amplificationFactor * data[i];
     }
     audioData = data;
 

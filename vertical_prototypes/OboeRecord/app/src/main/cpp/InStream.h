@@ -7,7 +7,7 @@
 class InStream : public Stream {
 public:
     InStream();
-    oboe::ResultWithValue<int32_t> read(void* audioData, int32_t numFrames); // set the timeout to 0
+    oboe::ResultWithValue<int32_t> read(void* audioData, int32_t numFrames);
 };
 
 

@@ -10,21 +10,20 @@ public:
     static uint32_t const maxRecordSize = 20000000;
     static oboe::AudioFormat const format = oboe::AudioFormat::I16;
     static oboe::ChannelCount const channelCount = oboe::ChannelCount::Mono;
-    static uint32_t const samplingRate = 44000;
-    static uint8_t const bytesPerSample = 2;
-    static uint16_t const warmupFrames = samplingRate/2;
     static oboe::PerformanceMode const performanceMode = oboe::PerformanceMode::LowLatency;
     static oboe::SharingMode const sharingMode = oboe::SharingMode::Exclusive;
+    static uint32_t const samplingRate = 8000;
+    static uint8_t const bytesPerSample = 2;
+    static uint16_t const warmupFrames = samplingRate/2;
+
+    void start();
+    void stop();
 
 protected:
     oboe::AudioStreamBuilder* streamBuilder = new oboe::AudioStreamBuilder();
     oboe::AudioStream* stream = nullptr;
 
     Stream();
-
-public:
-    void start();
-    void stop();
 };
 
 

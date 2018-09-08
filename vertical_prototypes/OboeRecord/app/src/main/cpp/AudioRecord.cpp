@@ -23,6 +23,7 @@ void AudioRecord::resetReplay() {
 
 /*
  * TODO Prevent overflows
+ * TODO Consider using memcopy
  */
 void AudioRecord::appendFrames(int16_t* frames, int32_t numFrames) {
     if (recordingHead + numFrames >= maxSize) {

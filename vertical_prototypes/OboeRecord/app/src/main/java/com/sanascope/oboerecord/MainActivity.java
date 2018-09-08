@@ -8,6 +8,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
@@ -15,6 +16,8 @@ public class MainActivity extends AppCompatActivity {
 
     final String noPermission = "Audio record permission denied";
     int AUDIO_EFFECT_REQUEST;
+    boolean isPlaying = false;
+    boolean isRecording = false;
 
     // Used to load the 'native-lib' library on application startup.
     static {
@@ -26,14 +29,30 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Button
-        FloatingActionButton toggleButton = (FloatingActionButton) findViewById(R.id.RecordButton);
+        // record button
+        Button toggleButton = (Button) findViewById(R.id.RecordButton);
         toggleButton.setOnClickListener(new View.OnClickListener()
         {
             public void onClick(View v)
             {
                 // Some Android versions require explicit requests for dangerous permissons
                 requestRecordPermission();
+            }
+        });
+
+        // replay button
+        Button playButton = (Button) findViewById(R.id.PlayButton);
+        playButton.setOnClickListener(new View.OnClickListener()
+        {
+            public void onClick(View v)
+            {
+                if (isPlaying) {
+                    stopPlaying();
+                    isPlaying = false;
+                } else {
+                    startPlaying();
+                    isPlaying = true;
+                }
             }
         });
 
@@ -93,7 +112,13 @@ public class MainActivity extends AppCompatActivity {
                     .show();
         } else {
             // Permission was granted, start recording
-            throughput();
+            if (isRecording) {
+                stopRecording();
+                isRecording = false;
+            } else {
+                startRecording();
+                isRecording = true;
+            }
         }
     }
 
@@ -101,7 +126,10 @@ public class MainActivity extends AppCompatActivity {
      * Imports oboe and creates and starts an input audio stream,
      * records some frames, then stops and closes the stream.
      */
-    public native void throughput();
+    public native void startRecording();
+    public native void stopRecording();
+    public native void startPlaying();
+    public native void stopPlaying();
     public native void initialize();
     public native void setAmplification(int factor);
 }

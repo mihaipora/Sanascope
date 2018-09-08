@@ -4,25 +4,23 @@
 
 #include <cstddef>
 #include <cstdint>
-#include "DebugUtils.h"
+#include "Loggable.h"
 
 
-class AudioRecord {
+class AudioRecord : Loggable {
 private:
-    const char* LOG_TAG = "SAudioRecord";
-
-    void* binaryData;
-    uint32_t recordingSize = 0;
+    int16_t* frames;
+    uint32_t maxSize = 0;
 
     uint32_t recordingHead = 0;
     uint32_t replayHead = 0;
 
 public:
     AudioRecord(uint32_t size);
-    void clear();
-    void reset();
-    void appendFrames();
-    void fetchFrames();
+    void appendFrames(int16_t* frames, int32_t numFrames);
+    bool fetchFrames(int16_t* frames, int32_t numFrames);
+    void resetRecord();
+    void resetReplay();
 };
 
 

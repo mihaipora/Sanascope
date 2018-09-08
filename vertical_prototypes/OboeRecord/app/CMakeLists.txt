@@ -17,11 +17,12 @@ add_library( # Sets the name of the library.
              SHARED
 
              # Provides a relative path to your source file(s).
-             src/main/cpp/AudioController.cpp
-             src/main/cpp/AudioRecorder.cpp
+             src/main/cpp/JniBridge.cpp
+             src/main/cpp/AudioEngine.cpp
              src/main/cpp/AudioRecord.cpp
-             src/main/cpp/AudioPlayer.cpp
-             src/main/cpp/Utils.cpp
+             src/main/cpp/Stream.cpp
+             src/main/cpp/InStream.cpp
+             src/main/cpp/OutStream.cpp
              )
 
 # Searches for a specified prebuilt library and stores the path as a

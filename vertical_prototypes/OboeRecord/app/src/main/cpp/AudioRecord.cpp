@@ -2,26 +2,63 @@
 #include <cstdlib>
 #include "AudioRecord.h"
 
-AudioRecord::AudioRecord(uint32_t size) {
-    recordingSize = size;
-    binaryData = malloc(size);
-    clear();
-    reset();
+AudioRecord::AudioRecord(uint32_t size) : Loggable("SAudioRecord") {
+    infoLog("Initializing record object...");
+    maxSize = size;
+    frames = new int16_t[size/2];
+    resetRecord();
+    resetReplay();
+    infoLog("Record object initialized.");
 }
 
-void AudioRecord::clear() {
-    memset(binaryData, 0, recordingSize);
-}
-
-void AudioRecord::reset() {
+void AudioRecord::resetRecord() {
+    memset(frames, 0, maxSize);
     recordingHead = 0;
     replayHead = 0;
 }
 
-void AudioRecord::appendFrames() {
-    // TODO Implement
+void AudioRecord::resetReplay() {
+    replayHead = 0;
 }
 
-void AudioRecord::fetchFrames() {
-    // TODO Implement
+/*
+ * TODO Prevent overflows
+ */
+void AudioRecord::appendFrames(int16_t* frames, int32_t numFrames) {
+    if (recordingHead + numFrames >= maxSize) {
+        errorLog("Writing over the bounds!");
+        return;
+    }
+    if (frames == nullptr) {
+        errorLog("No space for the recording allocated!");
+        return;
+    }
+    infoLog("Appending frames...");
+    for (int32_t i = 0; i < numFrames; i++) {
+        this->frames[recordingHead+i] = frames[i];
+    }
+    recordingHead += numFrames;
+    infoLog("Appended ", numFrames," frames, recording head now at ", recordingHead);
+}
+
+/*
+ * TODO Prevent overflows
+ * @returns true if there is still more data to replay
+ */
+bool AudioRecord::fetchFrames(int16_t* frames, int32_t numFrames) {
+    if (recordingHead <= 0) {
+        errorLog("Trying to replay empty record.");
+        return false;
+    }
+    for (int32_t i = 0; i < numFrames; i++) {
+        frames[i] = this->frames[replayHead + i];
+    }
+    replayHead += numFrames;
+    infoLog("Fetched ", numFrames," frames, replay head now at ", replayHead, ".");
+
+    bool moreData = replayHead + numFrames < recordingHead;
+    if (!moreData) {
+        replayHead = 0;
+    }
+    return moreData;
 }

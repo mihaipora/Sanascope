@@ -7,6 +7,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
@@ -14,10 +15,12 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
+    final String logTag = "SAudioJMain";
     final String noPermission = "Audio record permission denied";
     int AUDIO_EFFECT_REQUEST;
-    boolean isPlaying = false;
-    boolean isRecording = false;
+    EngineState state = EngineState.IDLE;
+    Button recordButton;
+    Button playButton;
 
     // Used to load the 'native-lib' library on application startup.
     static {
@@ -30,8 +33,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // record button
-        Button toggleButton = (Button) findViewById(R.id.RecordButton);
-        toggleButton.setOnClickListener(new View.OnClickListener()
+        recordButton = (Button) findViewById(R.id.RecordButton);
+        recordButton.setOnClickListener(new View.OnClickListener()
         {
             public void onClick(View v)
             {
@@ -41,19 +44,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // replay button
-        Button playButton = (Button) findViewById(R.id.PlayButton);
-        playButton.setOnClickListener(new View.OnClickListener()
-        {
-            public void onClick(View v)
-            {
-                if (isPlaying) {
-                    stopPlaying();
-                    isPlaying = false;
-                } else {
-                    startPlaying();
-                    isPlaying = true;
-                }
-            }
+        playButton = (Button) findViewById(R.id.PlayButton);
+        playButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) { togglePlay(); }
         });
 
         // Seek bar
@@ -72,6 +65,34 @@ public class MainActivity extends AppCompatActivity {
         });
 
         initialize();
+    }
+
+    private void togglePlay() {
+        if (state == EngineState.IDLE) {
+            recordButton.setEnabled(false);
+            state = EngineState.PLAYING;
+            startPlaying();
+        } else if (state == EngineState.PLAYING) {
+            stopPlaying();
+            state = EngineState.IDLE;
+            recordButton.setEnabled(true);
+        } else {
+            Log.e(logTag, "Tapped play at an illegal state!");
+        }
+    }
+
+    private void toggleRecord() {
+        if (state == EngineState.IDLE) {
+            playButton.setEnabled(false);
+            state = EngineState.RECODING;
+            startRecording();
+        } else if (state == EngineState.RECODING) {
+            stopRecording();
+            state = EngineState.IDLE;
+            playButton.setEnabled(true);
+        } else {
+            Log.e(logTag, "Tapped record at an illegal state!");
+        }
     }
 
     /**
@@ -112,13 +133,7 @@ public class MainActivity extends AppCompatActivity {
                     .show();
         } else {
             // Permission was granted, start recording
-            if (isRecording) {
-                stopRecording();
-                isRecording = false;
-            } else {
-                startRecording();
-                isRecording = true;
-            }
+            toggleRecord();
         }
     }
 

@@ -57,8 +57,5 @@ bool AudioRecord::fetchFrames(int16_t* frames, int32_t numFrames) {
     infoLog("Fetched ", numFrames," frames, replay head now at ", replayHead, ".");
 
     bool moreData = replayHead + numFrames < recordingHead;
-    if (!moreData) {
-        replayHead = 0;
-    }
     return moreData;
 }

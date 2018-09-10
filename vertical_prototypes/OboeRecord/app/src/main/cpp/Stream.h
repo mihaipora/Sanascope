@@ -12,7 +12,7 @@ public:
     static oboe::ChannelCount const channelCount = oboe::ChannelCount::Mono;
     static oboe::PerformanceMode const performanceMode = oboe::PerformanceMode::LowLatency;
     static oboe::SharingMode const sharingMode = oboe::SharingMode::Exclusive;
-    static uint32_t const samplingRate = 8000;
+    static uint32_t const samplingRate = 44100;
     static uint8_t const bytesPerSample = 2;
     static uint16_t const warmupFrames = samplingRate/2;
 

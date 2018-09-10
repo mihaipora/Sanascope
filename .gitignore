@@ -1,3 +1,6 @@
+# raw files from DIA
+*.dia~
+
 # Built application files
 *.apk
 *.ap_

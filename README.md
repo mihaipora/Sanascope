@@ -10,9 +10,11 @@ Also the app crashes when trying to write onto the SD card.
 Try requesting the writing permissions manually.
 
 ### OboeRecord
-Needs the oboe library https://github.com/dromescu/oboe to be cloned
-into the same parent directory as /Sanascope to work properly.
+Records sound from an audio source (headset, if connected, phone mic otherwise)
+simultaneously outputting it on the speakers or headphones
+and writing it into RAM.
 
-Audio input stream can be created, started, stopped and closed.
-However, the app crashes after reading a few frames.
-Possibly there are issues with buffers or memory allocation.
+Needs the oboe library https://github.com/dromescu/oboe
+and the FIR filter implementation by CardinalPeak
+https://cardinalpeak.com/blog/a-c-class-to-implement-low-pass-high-pass-and-band-pass-filters/
+in the same parent directory as /Sanascope to work properly.

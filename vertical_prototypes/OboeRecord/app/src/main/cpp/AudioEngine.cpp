@@ -8,6 +8,7 @@ AudioEngine::AudioEngine() : Loggable("SAudioEngine") {
     infoLog("Creating audio engine...");
     state = EngineState::Idle;
     record = new AudioRecord(Stream::maxRecordSize);
+    filter = new FilterAdapter(Stream::samplingRate, Stream::samplingRate/12);
     inStream = new InStream();
     outStream = new OutStream(this);
     setAmplificationFactor(10);
@@ -131,7 +132,7 @@ oboe::DataCallbackResult AudioEngine::inputCallback(void* audioData, int32_t num
     infoLog("Amplifying audioData...");
     int16_t* data = static_cast<int16_t*>(audioData);
     for (int i = 0; i < numFrames; i++) {
-        data[i] = ampliFactor * data[i];
+        data[i] = filter->processFrame(ampliFactor * data[i]);
     }
     infoLog("Audio data amplified.");
     audioData = data;

@@ -4,6 +4,7 @@
 #include "AudioRecord.h"
 #include "InStream.h"
 #include "OutStream.h"
+#include "FilterAdapter.h"
 
 enum class EngineState {Idle, Recording, Playing};
 
@@ -16,7 +17,7 @@ private:
 
     InStream* inStream;
     OutStream* outStream;
-
+    FilterAdapter* filter;
 
     oboe::DataCallbackResult outputCallback(void* audioData, int32_t numFrames);
     oboe::DataCallbackResult inputCallback(void* audioData, int32_t numFrames);

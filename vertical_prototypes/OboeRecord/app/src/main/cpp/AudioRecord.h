@@ -4,6 +4,8 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <iostream>
+#include <fstream>
 #include "Loggable.h"
 
 
@@ -17,10 +19,12 @@ private:
 
 public:
     AudioRecord(uint32_t size);
+    bool isEmpty() const;
     void appendFrames(int16_t* frames, int32_t numFrames);
     bool fetchFrames(int16_t* frames, int32_t numFrames);
     void resetRecord();
     void resetReplay();
+    void writeFile(std::string filepath) const;
 };
 
 

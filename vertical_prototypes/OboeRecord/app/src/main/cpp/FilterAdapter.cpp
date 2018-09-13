@@ -7,5 +7,6 @@ FilterAdapter::FilterAdapter(int32_t inputFreq, int32_t outputFreq) {
 }
 
 int16_t FilterAdapter::processFrame(int16_t frame) {
-    return filter->do_sample(frame/32767.0)*32767;
+    //return filter->do_sample(frame/32767.0)*32767;
+    return frame;
 }

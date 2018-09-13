@@ -28,6 +28,7 @@ public:
     void startPlaying();
     void stopPlaying();
     void setAmplificationFactor(int factor) {ampliFactor = factor; };
+    void storeReord(std::string filepath) const;
 
     oboe::DataCallbackResult
     onAudioReady(oboe::AudioStream *oboeStream, void *audioData, int32_t numFrames) override;

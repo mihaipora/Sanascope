@@ -2,6 +2,7 @@ package com.sanascope.oboerecord;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -16,7 +17,7 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity {
 
     final String logTag = "SAudioJMain";
-    final String noPermission = "Audio record permission denied";
+    final String noPermission = "Audio record or storage write permission denied";
     int AUDIO_EFFECT_REQUEST;
     EngineState state = EngineState.IDLE;
     Button recordButton;
@@ -95,13 +96,21 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void writeFile() {
+        String filePath;
+        //filePath = getFilesDir().getAbsolutePath(); // internal
+        filePath = Environment.getExternalStorageDirectory().getAbsolutePath(); // external
+        storeRecord(filePath);
+    }
+
     /**
      * Requests explicit permission for audio record and triggers onRequestPermissionsResult()
      */
     private void requestRecordPermission(){
         ActivityCompat.requestPermissions(
                 this,
-                new String[]{Manifest.permission.RECORD_AUDIO},
+                new String[]{Manifest.permission.RECORD_AUDIO,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE},
                 AUDIO_EFFECT_REQUEST);
     }
 
@@ -122,8 +131,9 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        if (grantResults.length != 1 ||
-                grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+        if (grantResults.length != 2 ||
+                grantResults[0] != PackageManager.PERMISSION_GRANTED ||
+                grantResults[1] != PackageManager.PERMISSION_GRANTED) {
 
             // User denied the permission, without this we cannot record audio
             // Show a toast and update the status accordingly
@@ -147,4 +157,5 @@ public class MainActivity extends AppCompatActivity {
     public native void stopPlaying();
     public native void initialize();
     public native void setAmplification(int factor);
+    public native void storeRecord(String filepath);
 }

@@ -5,9 +5,9 @@ SanascopeProject
 
 ### CStorageTest
 
-Currently unable to write into the internal storage of the device.
-Also the app crashes when trying to write onto the SD card.
-Try requesting the writing permissions manually.
+Writing one file from Java code and one from C++ code into the public directory.
+Contains a workaround for an MTP bug preventing the created files and directories
+to show up in the explorer when the device is connected as mass storage.
 
 ### OboeRecord
 Records sound from an audio source (headset, if connected, phone mic otherwise)

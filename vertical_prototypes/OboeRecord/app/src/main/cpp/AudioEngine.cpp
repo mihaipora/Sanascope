@@ -64,6 +64,16 @@ void AudioEngine::stopPlaying() {
     infoLog("Replay stopped.");
 }
 
+void AudioEngine::storeReord(std::string filepath) const {
+    if (state != EngineState::Idle) {
+        errorLog("Trying to store record from a state other than Idle!");
+        return;
+    }
+    infoLog("Storing record...");
+    record->writeFile(filepath);
+    infoLog("Record stored...");
+}
+
 
 oboe::DataCallbackResult
 AudioEngine::onAudioReady(oboe::AudioStream* oboeStream, void* audioData, int32_t numFrames) {

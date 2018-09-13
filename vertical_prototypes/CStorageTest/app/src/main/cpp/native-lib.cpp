@@ -9,7 +9,7 @@
  * @param msg The message to log
  */
 void infoLog(const char* msg) {
-    __android_log_print(ANDROID_LOG_INFO, "MainActivityLogCPP", "%s", msg);
+    __android_log_print(ANDROID_LOG_INFO, "CStoragePP", "%s", msg);
 }
 
 extern "C" JNIEXPORT jstring JNICALL
@@ -30,7 +30,7 @@ Java_com_sanascope_cstoragetest_MainActivity_writeFile(
     const std::string cont_str = std::string(content);
 
     // create and open file stream
-    std::ofstream outfile(path_str + "/test.txt"); // opens by default an output stream
+    std::ofstream outfile(path_str); // opens by default an output stream
     if (outfile.is_open()) {
         infoLog("filestream open");
     } else {

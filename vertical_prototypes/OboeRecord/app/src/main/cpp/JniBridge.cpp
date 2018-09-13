@@ -52,10 +52,23 @@ Java_com_sanascope_oboerecord_MainActivity_stopPlaying(JNIEnv *env, jobject /* t
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_sanascope_oboerecord_MainActivity_setAmplification(JNIEnv *env, jobject /* this */,
-        jint newValue) {
+                                                            jint newValue) {
     if (!ac) {
         logger->errorLog("No AudioEngine object.");
     }
     ac->setAmplificationFactor(newValue);
     logger->infoLog("Amplification factor changed.");
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_sanascope_oboerecord_MainActivity_storeRecord(JNIEnv *env, jobject /* this */,
+                                                         jstring jFilepath) {
+    //path
+    const char* path = env->GetStringUTFChars(jFilepath, 0);
+    env->ReleaseStringUTFChars(jFilepath, path);
+    std::string filepath = std::string(path);
+    if (!ac) {
+        logger->errorLog("No AudioEngine object.");
+    }
+    ac->storeReord(filepath);
 }

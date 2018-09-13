@@ -11,6 +11,10 @@ AudioRecord::AudioRecord(uint32_t size) : Loggable("SAudioRecord") {
     infoLog("Record object initialized.");
 }
 
+bool AudioRecord::isEmpty() const {
+    return recordingHead > 0;
+}
+
 void AudioRecord::resetRecord() {
     memset(frames, 0, maxSize);
     recordingHead = 0;
@@ -59,4 +63,18 @@ bool AudioRecord::fetchFrames(int16_t* frames, int32_t numFrames) {
 
     bool moreData = replayHead + numFrames < recordingHead;
     return moreData;
+}
+
+void AudioRecord::writeFile(std::string filepath) const {
+    // create and open file stream
+    std::ofstream outfile(filepath + "/testfile.txt"); // opens by default an output stream
+    if (outfile.is_open()) {
+        infoLog("Filestream open");
+    } else {
+        infoLog("Filestream not open");
+    }
+
+    // write the file and close the stream
+    outfile << "Surprise Motherfucker!!" << std::endl;
+    outfile.close();
 }

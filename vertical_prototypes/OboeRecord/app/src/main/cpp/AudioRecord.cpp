@@ -67,7 +67,7 @@ bool AudioRecord::fetchFrames(int16_t* frames, int32_t numFrames) {
 
 void AudioRecord::writeFile(std::string filepath) const {
     // create and open file stream
-    std::ofstream outfile(filepath + "/testfile.txt"); // opens by default an output stream
+    std::ofstream outfile(filepath); // opens by default an output stream
     if (outfile.is_open()) {
         infoLog("Filestream open");
     } else {

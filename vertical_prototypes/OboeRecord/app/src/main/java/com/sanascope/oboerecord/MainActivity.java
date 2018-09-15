@@ -2,6 +2,7 @@ package com.sanascope.oboerecord;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.media.MediaScannerConnection;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -80,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Log.e(logTag, "Tapped play at an illegal state!");
         }
+        writeFile();
     }
 
     private void toggleRecord() {
@@ -98,9 +100,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void writeFile() {
         String filePath;
-        //filePath = getFilesDir().getAbsolutePath(); // internal
-        filePath = Environment.getExternalStorageDirectory().getAbsolutePath(); // external
+
+        // internal
+        //filePath = getFilesDir().getAbsolutePath();
+
+        // external
+        filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/testfile.txt";
         storeRecord(filePath);
+        MediaScannerConnection.scanFile(this, new String[] {filePath}, null, null);
     }
 
     /**

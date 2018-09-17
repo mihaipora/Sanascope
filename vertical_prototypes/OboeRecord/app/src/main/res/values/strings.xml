@@ -3,6 +3,7 @@
     <string name="amplifier_bar">Amplification Factor</string>
     <string name="recordButtonText">Record</string>
     <string name="playButtonText">Play</string>
+    <string name="saveButtonText">Save</string>
     <integer name="max_amplification">20</integer>
     <integer name="def_amplification">10</integer>
 </resources>

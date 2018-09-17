@@ -18,11 +18,13 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity {
 
     final String logTag = "SAudioJMain";
+    boolean permissionsGranted = false;
     final String noPermission = "Audio record or storage write permission denied";
     int AUDIO_EFFECT_REQUEST;
     EngineState state = EngineState.IDLE;
     Button recordButton;
     Button playButton;
+    Button saveButton;
 
     // Used to load the 'native-lib' library on application startup.
     static {
@@ -41,14 +43,27 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v)
             {
                 // Some Android versions require explicit requests for dangerous permissons
-                requestRecordPermission();
+                if (!permissionsGranted) { requestRecordPermission(); }
+                toggleRecord();
             }
         });
 
         // replay button
         playButton = (Button) findViewById(R.id.PlayButton);
         playButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) { togglePlay(); }
+            public void onClick(View v) {
+                if (!permissionsGranted) { requestRecordPermission(); }
+                togglePlay(); }
+        });
+
+        // save button
+        saveButton = (Button) findViewById(R.id.SaveButton);
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!permissionsGranted) { requestRecordPermission(); }
+                writeFile();
+            }
         });
 
         // Seek bar
@@ -81,7 +96,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Log.e(logTag, "Tapped play at an illegal state!");
         }
-        writeFile();
     }
 
     private void toggleRecord() {
@@ -100,12 +114,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void writeFile() {
         String filePath;
-
         // internal
         //filePath = getFilesDir().getAbsolutePath();
 
         // external
         filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/testfile.txt";
+
         storeRecord(filePath);
         MediaScannerConnection.scanFile(this, new String[] {filePath}, null, null);
     }
@@ -149,8 +163,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.LENGTH_SHORT)
                     .show();
         } else {
-            // Permission was granted, start recording
-            toggleRecord();
+            permissionsGranted = true;
         }
     }
 

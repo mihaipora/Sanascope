@@ -9,7 +9,9 @@ cmake_minimum_required(VERSION 3.4.1)
 # or SHARED, and provides the relative paths to its source code.
 # You can define multiple libraries, and CMake builds them for you.
 # Gradle automatically packages shared libraries with your APK.
+
 set (FILT_DIR ../../../../filt)
+set (ENDIAN_DIR ../../../../boost/libs/endian/include) # remove if boost is not used
 
 add_library( # Sets the name of the library.
              native-lib
@@ -68,3 +70,4 @@ add_subdirectory (${OBOE_DIR} ./oboe)
 # Specify the path to the header files.
 include_directories (${OBOE_DIR}/include)
 include_directories (${FILT_DIR})
+include_directories (${ENDIAN_DIR}) #remove if boost is not used

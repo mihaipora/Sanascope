@@ -1,6 +1,7 @@
 #include <cstring>
 #include <cstdlib>
 #include "AudioRecord.h"
+#include "Stream.h"
 
 AudioRecord::AudioRecord(uint32_t size) : Loggable("SAudioRecord") {
     infoLog("Initializing record object...");
@@ -65,16 +66,75 @@ bool AudioRecord::fetchFrames(int16_t* frames, int32_t numFrames) {
     return moreData;
 }
 
-void AudioRecord::writeFile(std::string filepath) const {
-    // create and open file stream
-    std::ofstream outfile(filepath); // opens by default an output stream
-    if (outfile.is_open()) {
-        infoLog("Filestream open");
-    } else {
-        infoLog("Filestream not open");
+bool AudioRecord::writeFile(std::string filepath) const {
+    if (isEmpty()) {
+        errorLog("Trying to store empty record.");
+        return false;
     }
 
-    // write the file and close the stream
-    outfile << "Surprise Motherfucker!!" << std::endl;
-    outfile.close();
+    // create and open file stream
+    std::ofstream* outfile = new std::ofstream(); // opens by default an output stream
+    outfile->open(filepath, std::ofstream::out);
+    if (outfile->is_open()) {
+        infoLog("Filestream open.");
+        if (!writeHeader(outfile)){
+            errorLog("Header couldn't be written!");
+            return false; // no need for more precise information than "writing failed"
+        }
+        infoLog("Header written.");
+        if (!writeFrames(outfile)){
+            errorLog("Frames couldn't be written!");
+            return false;
+        }
+        infoLog("Frames written.");
+    } else {
+        errorLog("Filestream not open.");
+        return false;
+    }
+    outfile->close();
+    return true;
+}
+
+void writeBytes(uint8_t* bytes, uint8_t numBytes, std::ofstream* targetStream){
+    for (int i=0; i<numBytes; i++) {
+        *targetStream << bytes[i];
+    }
+}
+
+/*
+bool isLittleEndian () {
+    uint32_t num = 1;
+    return *(uint16_t *)&num == 1;
+}
+
+template <typename I>
+I littleEndian(I i){
+    if (isLittleEndian()) {
+        return i;
+    } else {
+        return i;
+    }
+}*/
+
+bool AudioRecord::writeHeader(std::ofstream* targetStream) const {
+    infoLog("Writing WAV header.");
+
+    //big_int32_at x = 100;
+
+    /*
+    uint8_t* RIFF_HEADER = new uint8_t[] { 0x52, 0x49, 0x46, 0x46 };
+    uint8_t* FORMAT_WAVE = new uint8_t[] { 0x57, 0x41, 0x56, 0x45 };
+    uint8_t* FORMAT_TAG  = new uint8_t[] { 0x66, 0x6d, 0x74, 0x20 };
+    uint8_t* AUDIO_FORMAT = new uint8_t[] {0x01, 0x00};
+    uint8_t* SUBCHUNK_ID  = new uint8_t[] { 0x64, 0x61, 0x74, 0x61 };
+
+    const uint8_t headerSize = 36;
+    const uint64_t dataSize = recordingHead*Stream::bytesPerSample*Stream::channelCount;
+    */
+    return true;
+}
+
+bool AudioRecord::writeFrames(std::ofstream* fileStream) const {
+    infoLog("Writing WAV frames.");
+    return true;
 }

@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <iostream>
 #include <fstream>
+//#include <boost/endian/arithmetic.hpp>
 #include "Loggable.h"
 
 
@@ -24,7 +25,11 @@ public:
     bool fetchFrames(int16_t* frames, int32_t numFrames);
     void resetRecord();
     void resetReplay();
-    void writeFile(std::string filepath) const;
+    bool writeFile(std::string filepath) const;
+
+private:
+    bool writeHeader(std::ofstream* fileStream) const;
+    bool writeFrames(std::ofstream* fileStream) const;
 };
 
 

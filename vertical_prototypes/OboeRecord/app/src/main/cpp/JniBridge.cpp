@@ -70,5 +70,5 @@ Java_com_sanascope_oboerecord_MainActivity_storeRecord(JNIEnv *env, jobject /* t
     if (!ac) {
         logger->errorLog("No AudioEngine object.");
     }
-    ac->storeReord(filepath);
+    ac->storeRecord(filepath);
 }

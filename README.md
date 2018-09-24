@@ -1,6 +1,15 @@
 # Sanascope
 SanascopeProject
 
+Sanascope is an electronic stethoscope for home use.
+The first Milestone is to design a recording app so that the device can find use in telemedical consultations.
+Once that is done we will focus on training an artificial neural network to recognize patholoical heart and lung sounds.
+
+At the current state we test the waters and familiarize ourselves with the Android NDK.
+We research what has been done so far and which libraries we can use and how to do so.
+To this end we implement vertical prototypes to test different functionalities of the recording app.
+
+
 ## Vertical prototypes
 
 ### CStorageTest

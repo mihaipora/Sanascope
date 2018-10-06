@@ -5,7 +5,6 @@ import android.content.pm.PackageManager;
 import android.media.MediaScannerConnection;
 import android.os.Environment;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,15 +15,14 @@ import android.widget.SeekBar;
 import android.widget.Toast;
 
 import java.io.File;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
     final String logTag = "SAudioJMain";
     boolean permissionsGranted = false;
+    boolean currentRecordingStored = false;
     final String noPermission = "Audio record or storage write permission denied";
     int AUDIO_EFFECT_REQUEST;
     EngineState state = EngineState.IDLE;
@@ -110,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
         if (state == EngineState.IDLE) {
             playButton.setEnabled(false);
             saveButton.setEnabled(false);
+            currentRecordingStored = false;
             state = EngineState.RECODING;
             startRecording();
         } else if (state == EngineState.RECODING) {
@@ -123,6 +122,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void writeFile() {
+        if (currentRecordingStored) {
+            Toast.makeText(this,
+                    "The current recording is already stored.",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         // prepare the folder
         String folderName = getResources().getString(R.string.record_folder_name);
         // external storage for now to allow for easy transfer
@@ -151,6 +157,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "Failed to save the recording!", Toast.LENGTH_SHORT).show();
         }
+        currentRecordingStored = true;
 
         // workaround to refresh the file browser
         MediaScannerConnection.scanFile(this, new String[] {filePathStr}, null, null);

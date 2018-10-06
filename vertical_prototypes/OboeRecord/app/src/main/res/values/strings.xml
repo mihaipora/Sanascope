@@ -2,6 +2,9 @@
     <string name="app_name">OboeRecord</string>
     <string name="amplifier_bar">Amplification Factor</string>
     <string name="sensitivity_text">sensitivity</string>
+    <string name="general_warning">Be wary of acoustic feedback loops!\nIt
+        is not recommended to start a recording without a Sanascope
+        or wired headset connected.</string>
 
     <string name="recordButtonText">Record</string>
     <string name="playButtonText">Play</string>

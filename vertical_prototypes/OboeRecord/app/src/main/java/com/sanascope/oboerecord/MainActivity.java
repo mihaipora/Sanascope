@@ -15,6 +15,12 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import java.io.File;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
 public class MainActivity extends AppCompatActivity {
 
     final String logTag = "SAudioJMain";
@@ -87,12 +93,14 @@ public class MainActivity extends AppCompatActivity {
     private void togglePlay() {
         if (state == EngineState.IDLE) {
             recordButton.setEnabled(false);
+            saveButton.setEnabled(false);
             state = EngineState.PLAYING;
             startPlaying();
         } else if (state == EngineState.PLAYING) {
             stopPlaying();
             state = EngineState.IDLE;
             recordButton.setEnabled(true);
+            saveButton.setEnabled(true);
         } else {
             Log.e(logTag, "Tapped play at an illegal state!");
         }
@@ -101,27 +109,49 @@ public class MainActivity extends AppCompatActivity {
     private void toggleRecord() {
         if (state == EngineState.IDLE) {
             playButton.setEnabled(false);
+            saveButton.setEnabled(false);
             state = EngineState.RECODING;
             startRecording();
         } else if (state == EngineState.RECODING) {
             stopRecording();
             state = EngineState.IDLE;
             playButton.setEnabled(true);
+            saveButton.setEnabled(true);
         } else {
             Log.e(logTag, "Tapped record at an illegal state!");
         }
     }
 
     private void writeFile() {
-        String filePath;
-        // internal
-        //filePath = getFilesDir().getAbsolutePath();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+        String dateString = formatter.format(new Date());
 
-        // external
-        filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/testfile.wav";
+        String folderName = getResources().getString(R.string.record_folder_name);
+        String fileName = dateString + ".wav";
+        File folderPath, filePath;
 
-        storeRecord(filePath);
-        MediaScannerConnection.scanFile(this, new String[] {filePath}, null, null);
+        // external storage for now to allow for easy transfer
+        folderPath = new File(Environment.getExternalStorageDirectory()
+                + File.separator + folderName);
+
+        // create folder if it doesn't exist yet
+        if (!folderPath.exists()) {
+            if (!folderPath.mkdirs()) {
+                Toast.makeText(this,
+                        getResources().getString(R.string.error_msg_folder_creation),
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        filePath = new File(folderPath, fileName);
+
+        String filePathStr = filePath.getAbsolutePath();
+        storeRecord(filePathStr); // make it bool and display dependant toast
+        Toast.makeText(this, "saved as " + fileName, Toast.LENGTH_SHORT).show();
+
+        // workaround to refresh the file browser
+        MediaScannerConnection.scanFile(this, new String[] {filePathStr}, null, null);
     }
 
     /**

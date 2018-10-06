@@ -1,9 +1,16 @@
 <resources>
     <string name="app_name">OboeRecord</string>
     <string name="amplifier_bar">Amplification Factor</string>
+    <string name="sensitivity_text">sensitivity</string>
+
     <string name="recordButtonText">Record</string>
     <string name="playButtonText">Play</string>
     <string name="saveButtonText">Save</string>
+
     <integer name="max_amplification">20</integer>
     <integer name="def_amplification">10</integer>
+
+    <string name="record_folder_name">Sanascope</string>
+
+    <string name="error_msg_folder_creation">Couldn\'t create folder for recordings.</string>
 </resources>

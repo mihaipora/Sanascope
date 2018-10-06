@@ -13,7 +13,7 @@ AudioRecord::AudioRecord(uint32_t size) : Loggable("SAudioRecord") {
 }
 
 bool AudioRecord::isEmpty() const {
-    return recordingHead > 0;
+    return recordingHead <= 0;
 }
 
 void AudioRecord::resetRecord() {
@@ -66,6 +66,15 @@ bool AudioRecord::fetchFrames(int16_t* frames, int32_t numFrames) {
     return moreData;
 }
 
+template <typename T>
+bool writeBinary(std::ofstream* targetStream, T data){
+    char* binary = ((char*) &data);
+    for (char i = 0; i < sizeof(T); i++) {
+        *targetStream << binary[i];
+    }
+    return true;
+}
+
 bool AudioRecord::writeFile(std::string filepath) const {
     if (isEmpty()) {
         errorLog("Trying to store empty record.");
@@ -74,7 +83,7 @@ bool AudioRecord::writeFile(std::string filepath) const {
 
     // create and open file stream
     std::ofstream* outfile = new std::ofstream(); // opens by default an output stream
-    outfile->open(filepath, std::ofstream::out);
+    outfile->open(filepath, std::ios::out|std::ios::binary|std::ios::ate);
     if (outfile->is_open()) {
         infoLog("Filestream open.");
         if (!writeHeader(outfile)){
@@ -95,46 +104,61 @@ bool AudioRecord::writeFile(std::string filepath) const {
     return true;
 }
 
-void writeBytes(uint8_t* bytes, uint8_t numBytes, std::ofstream* targetStream){
-    for (int i=0; i<numBytes; i++) {
-        *targetStream << bytes[i];
-    }
-}
 
-/*
-bool isLittleEndian () {
-    uint32_t num = 1;
-    return *(uint16_t *)&num == 1;
-}
-
-template <typename I>
-I littleEndian(I i){
-    if (isLittleEndian()) {
-        return i;
-    } else {
-        return i;
-    }
-}*/
 
 bool AudioRecord::writeHeader(std::ofstream* targetStream) const {
+
     infoLog("Writing WAV header.");
+    using namespace boost::endian;
 
-    //big_int32_at x = 100;
+    infoLog("Preparing header fields.");
+    // RIFF chunk descriptor
+    const big_int32_t RIFF_HEADER = 0x52494646;
+    const little_int32_t headerSize = native_to_little(36);
+    const little_int32_t dataSize = native_to_little(recordingHead * Stream::bytesPerSample * Stream::channelCount);
+    const little_int32_t CHUNK_SIZE = native_to_little(headerSize+dataSize);
+    const big_int32_t FORMAT_WAVE = 0x57415645;
 
-    /*
-    uint8_t* RIFF_HEADER = new uint8_t[] { 0x52, 0x49, 0x46, 0x46 };
-    uint8_t* FORMAT_WAVE = new uint8_t[] { 0x57, 0x41, 0x56, 0x45 };
-    uint8_t* FORMAT_TAG  = new uint8_t[] { 0x66, 0x6d, 0x74, 0x20 };
-    uint8_t* AUDIO_FORMAT = new uint8_t[] {0x01, 0x00};
-    uint8_t* SUBCHUNK_ID  = new uint8_t[] { 0x64, 0x61, 0x74, 0x61 };
+    // fmt subchunk
+    const big_int32_t SUBCHUNK_1_ID = 0x666d7420;
+    const little_int32_t SUBCHUNK_1_SIZE = native_to_little(16);
+    const little_int16_t AUDIO_FORMAT = native_to_little(1);
+    const little_int16_t NUM_CHANNELS = native_to_little(Stream::channelCount);
+    const little_int32_t SAMPLE_RATE = native_to_little(Stream::samplingRate);
+    const little_int32_t BYTE_RATE = native_to_little(Stream::samplingRate * Stream::channelCount * Stream::bytesPerSample);
+    const little_int16_t BLOCK_ALIGN = native_to_little(Stream::channelCount * Stream::bytesPerSample);
+    const little_int16_t BITS_PER_SAMPLE = native_to_little(16);
 
-    const uint8_t headerSize = 36;
-    const uint64_t dataSize = recordingHead*Stream::bytesPerSample*Stream::channelCount;
-    */
+    // data subchunk
+    const big_int32_t SUBCHUNK_2_ID = 0x64617461;
+    const little_int32_t SUBCHUNK_2_SIZE = native_to_little(dataSize);
+    infoLog("Header fields prepared.");
+
+    infoLog("Writing header fields.");
+    writeBinary(targetStream, RIFF_HEADER);
+    writeBinary(targetStream, CHUNK_SIZE);
+    writeBinary(targetStream, FORMAT_WAVE);
+
+    writeBinary(targetStream, SUBCHUNK_1_ID);
+    writeBinary(targetStream, SUBCHUNK_1_SIZE);
+    writeBinary(targetStream, AUDIO_FORMAT);
+    writeBinary(targetStream, NUM_CHANNELS);
+    writeBinary(targetStream, SAMPLE_RATE);
+    writeBinary(targetStream, BYTE_RATE);
+    writeBinary(targetStream, BLOCK_ALIGN);
+    writeBinary(targetStream, BITS_PER_SAMPLE);
+
+    writeBinary(targetStream, SUBCHUNK_2_ID);
+    writeBinary(targetStream, SUBCHUNK_2_SIZE);
+    infoLog("Header fields written.");
+
     return true;
 }
 
 bool AudioRecord::writeFrames(std::ofstream* fileStream) const {
     infoLog("Writing WAV frames.");
+    for (uint32_t i = 0; i < recordingHead; i++){
+        writeBinary(fileStream, boost::endian::native_to_little(frames[i]));
+    }
     return true;
 }

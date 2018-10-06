@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
         //filePath = getFilesDir().getAbsolutePath();
 
         // external
-        filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/testfile.txt";
+        filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/testfile.wav";
 
         storeRecord(filePath);
         MediaScannerConnection.scanFile(this, new String[] {filePath}, null, null);

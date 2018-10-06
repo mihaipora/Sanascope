@@ -6,8 +6,11 @@
 #include <cstdint>
 #include <iostream>
 #include <fstream>
-//#include <boost/endian/arithmetic.hpp>
+#include <boost/endian/arithmetic.hpp>
+#include <boost/endian/conversion.hpp>
+#include <arpa/inet.h>
 #include "Loggable.h"
+#include "Endian.h"
 
 
 class AudioRecord : Loggable {

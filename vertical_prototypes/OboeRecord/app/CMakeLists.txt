@@ -11,7 +11,7 @@ cmake_minimum_required(VERSION 3.4.1)
 # Gradle automatically packages shared libraries with your APK.
 
 set (FILT_DIR ../../../../filt)
-set (ENDIAN_DIR ../../../../boost/libs/endian/include) # remove if boost is not used
+
 
 add_library( # Sets the name of the library.
              native-lib
@@ -27,12 +27,11 @@ add_library( # Sets the name of the library.
              src/main/cpp/InStream.cpp
              src/main/cpp/OutStream.cpp
              src/main/cpp/FilterAdapter.cpp
-             ${FILT_DIR}/filt.cpp
              )
 
-#add_library(filt-lib
-#            SHARED
-#            ${FILT_DIR}/filt.cpp)
+add_library(filt-lib
+            SHARED
+            ${FILT_DIR}/filt.cpp)
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
@@ -57,8 +56,8 @@ target_link_libraries( # Specifies the target library.
                        # Links the target library to the log library
                        # included in the NDK.
                        oboe
+                       filt-lib
                        ${log-lib}
-                       #${filt-lib}
                        )
 
 # Set the path to the Oboe directory.
@@ -70,4 +69,4 @@ add_subdirectory (${OBOE_DIR} ./oboe)
 # Specify the path to the header files.
 include_directories (${OBOE_DIR}/include)
 include_directories (${FILT_DIR})
-include_directories (${ENDIAN_DIR}) #remove if boost is not used
+include_directories (../../../../boost-1_69/include/boost-1_69)

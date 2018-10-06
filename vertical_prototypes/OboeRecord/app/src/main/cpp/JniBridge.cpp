@@ -60,7 +60,7 @@ Java_com_sanascope_oboerecord_MainActivity_setAmplification(JNIEnv *env, jobject
     logger->infoLog("Amplification factor changed.");
 }
 
-extern "C" JNIEXPORT void JNICALL
+extern "C" JNIEXPORT jboolean JNICALL
 Java_com_sanascope_oboerecord_MainActivity_storeRecord(JNIEnv *env, jobject /* this */,
                                                          jstring jFilepath) {
     //path
@@ -69,6 +69,7 @@ Java_com_sanascope_oboerecord_MainActivity_storeRecord(JNIEnv *env, jobject /* t
     std::string filepath = std::string(path);
     if (!ac) {
         logger->errorLog("No AudioEngine object.");
+        return jboolean(false);
     }
-    ac->storeRecord(filepath);
+    return jboolean(ac->storeRecord(filepath));
 }

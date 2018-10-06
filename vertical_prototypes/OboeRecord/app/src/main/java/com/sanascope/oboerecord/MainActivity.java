@@ -123,17 +123,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void writeFile() {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-        String dateString = formatter.format(new Date());
-
+        // prepare the folder
         String folderName = getResources().getString(R.string.record_folder_name);
-        String fileName = dateString + ".wav";
-        File folderPath, filePath;
-
         // external storage for now to allow for easy transfer
-        folderPath = new File(Environment.getExternalStorageDirectory()
+        File folderPath = new File(Environment.getExternalStorageDirectory()
                 + File.separator + folderName);
-
         // create folder if it doesn't exist yet
         if (!folderPath.exists()) {
             if (!folderPath.mkdirs()) {
@@ -144,11 +138,19 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        filePath = new File(folderPath, fileName);
-
+        // prepare the file
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss"); // outsource constant
+        String dateString = formatter.format(new Date());
+        String fileName = dateString + ".wav";
+        File filePath = new File(folderPath, fileName);
         String filePathStr = filePath.getAbsolutePath();
-        storeRecord(filePathStr); // make it bool and display dependant toast
-        Toast.makeText(this, "saved as " + fileName, Toast.LENGTH_SHORT).show();
+
+        // store the record
+        if (storeRecord(filePathStr)) {
+            Toast.makeText(this, "Recording saved as: " + fileName, Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Failed to save the recording!", Toast.LENGTH_SHORT).show();
+        }
 
         // workaround to refresh the file browser
         MediaScannerConnection.scanFile(this, new String[] {filePathStr}, null, null);
@@ -207,5 +209,5 @@ public class MainActivity extends AppCompatActivity {
     public native void stopPlaying();
     public native void initialize();
     public native void setAmplification(int factor);
-    public native void storeRecord(String filepath);
+    public native boolean storeRecord(String filepath);
 }

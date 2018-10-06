@@ -64,14 +64,15 @@ void AudioEngine::stopPlaying() {
     infoLog("Replay stopped.");
 }
 
-void AudioEngine::storeRecord(std::string filepath) const {
+bool AudioEngine::storeRecord(std::string filepath) const {
     if (state != EngineState::Idle) {
         errorLog("Trying to store record from a state other than Idle!");
-        return;
+        return false;
     }
     infoLog("Storing record...");
-    record->writeFile(filepath);
+    bool result = record->writeFile(filepath);
     infoLog("Record stored...");
+    return result;
 }
 
 

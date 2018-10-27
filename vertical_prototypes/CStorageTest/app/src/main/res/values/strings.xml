@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">CStorageTest</string>
+    <string name="title_activity_authenticator">AuthenticatorActivity</string>
 </resources>

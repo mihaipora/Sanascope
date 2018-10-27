@@ -8,3 +8,11 @@
 /build
 /captures
 .externalNativeBuild
+
+#awsamplifyjs
+amplify/\#current-cloud-backend
+aws-info.json
+aws-exports.*
+amplify/backend/function/*/src/node_modules/
+amplify/backend/function/*/dist/
+

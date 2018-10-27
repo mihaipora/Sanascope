@@ -1,0 +1,14 @@
+{
+    "providers": {
+        "awscloudformation": {
+            "AuthRoleName": "torageest-20181027201800-authRole",
+            "UnauthRoleArn": "arn:aws:iam::372495256002:role/torageest-20181027201800-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::372495256002:role/torageest-20181027201800-authRole",
+            "Region": "us-east-1",
+            "DeploymentBucketName": "torageest-20181027201800-deployment",
+            "UnauthRoleName": "torageest-20181027201800-unauthRole",
+            "StackName": "torageest-20181027201800",
+            "StackId": "arn:aws:cloudformation:us-east-1:372495256002:stack/torageest-20181027201800/a3901510-da14-11e8-ae45-50d5cd24fac6"
+        }
+    }
+}

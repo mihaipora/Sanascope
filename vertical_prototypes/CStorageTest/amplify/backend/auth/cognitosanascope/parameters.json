@@ -1,0 +1,57 @@
+{
+    "identityPoolName": "cognitosanascope",
+    "allowUnauthenticatedIdentities": true,
+    "thirdPartyAuth": false,
+    "lambdaLogPolicy": "cognitosanascope_lambda_log_policy",
+    "openIdLambdaRoleName": "cognitosanascope_openid_lambda_role",
+    "openIdRolePolicy": "cognitosanascope_openid_pass_role_policy",
+    "openIdLambdaIAMPolicy": "cognitosanascope_openid_lambda_iam_policy",
+    "openIdLogPolicy": "cognitosanascope_openid_lambda_log_policy",
+    "userPoolName": "sanascopeuserpool",
+    "autoVerifiedAttributes": [
+        "email"
+    ],
+    "mfaConfiguration": "OFF",
+    "mfaTypes": [
+        "SMS Text Message"
+    ],
+    "roleName": "cognitosanascope_sns-role",
+    "roleExternalId": "cognitosanascope_role_external_id",
+    "policyName": "cognitosanascope-sns-policy",
+    "smsAuthenticationMessage": "Your authentication code is {####}",
+    "smsVerificationMessage": "Your verification code is {####}",
+    "emailVerificationSubject": "Your verification code",
+    "emailVerificationMessage": "Your verification code is {####}",
+    "defaultPasswordPolicy": false,
+    "passwordPolicyMinLength": 8,
+    "passwordPolicyCharacters": [
+        "Requires Lowercase",
+        "Requires Uppercase",
+        "Requires Numbers",
+        "Requires Symbols"
+    ],
+    "requiredAttributes": [
+        "email"
+    ],
+    "userpoolClientName": "cognitosanascope_app_client",
+    "userpoolClientGenerateSecret": true,
+    "userpoolClientRefreshTokenValidity": 30,
+    "userpoolClientReadAttributes": [
+        "email"
+    ],
+    "mfaLambdaRole": "cognitosanascope_totp_lambda_role",
+    "mfaLambdaLogPolicy": "cognitosanascope_totp_lambda_log_policy",
+    "mfaPassRolePolicy": "cognitosanascope_totp_pass_role_policy",
+    "mfaLambdaIAMPolicy": "cognitosanascope_totp_lambda_iam_policy",
+    "userpoolClientLambdaRole": "cognitosanascope_userpoolclient_lambda_role",
+    "userpoolClientLogPolicy": "cognitosanascope_userpoolclient_lambda_log_policy",
+    "userpoolClientLambdaPolicy": "cognitosanascope_userpoolclient_lambda_iam_policy",
+    "userpoolClientSetAttributes": false,
+    "useDefault": "manual",
+    "authSelections": "identityPoolAndUserPool",
+    "resourceName": "cognitosanascope",
+    "unAuthRoleName": "torageest-20181027201800-unauthRole",
+    "authRoleName": "torageest-20181027201800-authRole",
+    "unAuthRoleArn": "arn:aws:iam::372495256002:role/torageest-20181027201800-unauthRole",
+    "authRoleArn": "arn:aws:iam::372495256002:role/torageest-20181027201800-authRole"
+}

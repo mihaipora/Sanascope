@@ -6,10 +6,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.mobile.client.AWSMobileClient;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferState;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferObserver;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener;
+import com.amazonaws.services.s3.AmazonS3Client;
+
 import java.io.File;
 import java.io.FileWriter;
 
 import static android.os.Environment.getExternalStorageState;
+import static android.provider.Contacts.SettingsColumns.KEY;
+import static java.security.KeyRep.Type.SECRET;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,15 +36,20 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        AWSMobileClient.getInstance().initialize(this).execute();
         setContentView(R.layout.activity_main);
         if (isExternalStorageWritable()){
             File jFile = new File(getPublicStorageDir("storageTest"), "java_test.txt");
             Log.i(LOG_TAG, jFile.getAbsolutePath());
             writeTestFile(jFile);
 
+            uploadWithTransferUtility(jFile);
+
             File cFile = new File(getPublicStorageDir("storageTest"), "c_test.txt");
             Log.i(LOG_TAG, cFile.getAbsolutePath());
             writeFile(cFile.getAbsolutePath(), "Hello from C++.");
+
+            uploadWithTransferUtility(cFile);
 
             MediaScannerConnection.scanFile(this, new String[] {jFile.toString()}, null, null);
             MediaScannerConnection.scanFile(this, new String[] {cFile.toString()}, null, null);
@@ -83,6 +98,61 @@ public class MainActivity extends AppCompatActivity {
                 Log.i(LOG_TAG, "Directory " + listOfFiles[i].getName());
             }
         }
+    }
+
+    public void uploadWithTransferUtility(File fileToUpload) {
+
+        String fileName = fileToUpload.getName();
+        String absolutePath = fileToUpload.getAbsolutePath();
+
+        Log.i(LOG_TAG, "uploading file " + fileName + " from " + absolutePath);
+
+        TransferUtility transferUtility =
+                TransferUtility.builder()
+                        .context(getApplicationContext())
+                        .awsConfiguration(AWSMobileClient.getInstance().getConfiguration())
+                        .s3Client(new AmazonS3Client(AWSMobileClient.getInstance().getCredentialsProvider()))
+                        .build();
+
+        TransferObserver uploadObserver =
+                transferUtility.upload(
+                        "public/" + fileName,
+                        new File(absolutePath));
+
+        // Attach a listener to the observer to get state update and progress notifications
+        uploadObserver.setTransferListener(new TransferListener() {
+
+            @Override
+            public void onStateChanged(int id, TransferState state) {
+                if (TransferState.COMPLETED == state) {
+                    // Handle a completed upload.
+                }
+            }
+
+            @Override
+            public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
+                float percentDonef = ((float) bytesCurrent / (float) bytesTotal) * 100;
+                int percentDone = (int)percentDonef;
+
+                Log.d("YourActivity", "ID:" + id + " bytesCurrent: " + bytesCurrent
+                        + " bytesTotal: " + bytesTotal + " " + percentDone + "%");
+            }
+
+            @Override
+            public void onError(int id, Exception ex) {
+                // Handle errors
+            }
+
+        });
+
+        // If you prefer to poll for the data, instead of attaching a
+        // listener, check for the state and progress in the observer.
+        if (TransferState.COMPLETED == uploadObserver.getState()) {
+            // Handle a completed upload.
+        }
+
+        Log.d("YourActivity", "Bytes Transferred: " + uploadObserver.getBytesTransferred());
+        Log.d("YourActivity", "Bytes Total: " + uploadObserver.getBytesTotal());
     }
 
     /**

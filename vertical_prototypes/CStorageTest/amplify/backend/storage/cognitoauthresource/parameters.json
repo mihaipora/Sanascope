@@ -1,0 +1,9 @@
+{
+    "bucketName": "sanascope-data",
+    "authPolicyName": "s3_amplify_7d09462c",
+    "unauthPolicyName": "s3_amplify_7d09462c",
+    "authRoleName": "torageest-20181027201800-authRole",
+    "unauthRoleName": "torageest-20181027201800-unauthRole",
+    "authPermissions": "rw",
+    "unauthPermissions": "w"
+}
